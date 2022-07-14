@@ -68,16 +68,22 @@ _gui.pads.forEach(pad => {
 
 const startGame = () => {
   blink("--", () => {
-console.log("oskei!!")
+    newColor();
   });
 }
 
 const setScore = () => {
+  const score = _data.score.toString();
+  const display = score.padStart(2, "0");
 
+  _gui.counter.innerHTML = display;
 }
 
 const newColor = () => {
+  _data.gameSequence.push(Math.floor(Math.random() * 4));
+  _data.score++;
 
+  setScore();
 }
 
 const playSequence = () => {
@@ -91,6 +97,12 @@ const blink = (text, callback) => {
   _gui.counter.innerHTML = text;
 
   const interval = setInterval(() => {
+    if (!_data.gameOn) {
+      clearInterval(interval);
+      _gui.counter.classList.remove(".gui__counter--on");
+      return;
+    }
+
     if (on) {
       _gui.counter.classList.remove("gui__counter--on");
     } else {
