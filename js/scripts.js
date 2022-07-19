@@ -69,6 +69,7 @@ _gui.pads.forEach(pad => {
 const startGame = () => {
   blink("--", () => {
     newColor();
+    playSequence();
   });
 }
 
@@ -87,7 +88,41 @@ const newColor = () => {
 }
 
 const playSequence = () => {
+  let counter = 0,
+    padOn = true;
 
+  _data.playerSequence = [];
+  _data.playerCanPlay = false;
+
+  const interval = setInterval(() => {
+    if (!_data.gameOn) {
+      clearInterval(interval);
+      return;
+    }
+
+    if (counter === _data.gameSequence.length) {
+      clearInterval(interval);
+      disablePads();
+      waitForPlayerClick();
+      _data.playerCanPlay = true;
+      return;
+    }
+
+    if (padOn) {
+      const sndId = _data.gameSequence[counter];
+      const pad = _gui.pads[sndId];
+
+      _data.sounds[sndId].play();
+      pad.classList.add("game__pad--active");
+
+      counter++;
+    } else {
+      disablePads();
+    }
+
+    padOn = !padOn;
+
+  }, 750);
 }
 
 const blink = (text, callback) => {
@@ -119,7 +154,17 @@ const blink = (text, callback) => {
 }
 
 const waitForPlayerClick = () => {
+  clearTimeout(_data.setTimeout);
 
+  _data.setTimeout = setTimeout(() => {
+    if (!_data.playerCanPlay) {
+      return;
+    }
+
+    disablePads();
+    playSequence();
+
+  }, 5000)
 }
 
 const resetOrPlayAgain = () => {
@@ -132,6 +177,6 @@ const changePadCursor = (cursorType) => {
 
 const disablePads = () => {
   _gui.pads.forEach(pad => {
-    pad.classList.remove("game_pad--active")
+    pad.classList.remove("game__pad--active")
   });
 }
